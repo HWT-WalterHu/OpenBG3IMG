@@ -80,6 +80,10 @@ parser.add_argument(
     '--decay2', default=0.999, type=float,
     help="decay rate for second moment estimate in Adam"
 )
+parser.add_argument(
+    '--name', default='', type=str,
+    help="task name"
+)
 args = parser.parse_args()
 print(args)
 
@@ -139,11 +143,11 @@ for e in range(args.max_epochs):
         print("\t TRAIN: ", train)
         print("\t VALID : ", valid)
 
-if not os.path.exists('./checkpoints'):
-    os.mkdir('./checkpoints/')
+        if not os.path.exists('./checkpoints'):
+            os.mkdir('./checkpoints/')
 
-PATH = './checkpoints/OpenBG-IMG.ckpt'
-torch.save(model.state_dict(), PATH)
+        PATH = f'./checkpoints/OpenBG-IMG_{args.name}_{e}.ckpt'
+        torch.save(model.state_dict(), PATH)
 
 model.load_state_dict(torch.load(PATH))
 model.eval()
