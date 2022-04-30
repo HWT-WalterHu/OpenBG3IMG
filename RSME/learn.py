@@ -84,6 +84,10 @@ parser.add_argument(
     '--name', default='', type=str,
     help="task name"
 )
+parser.add_argument(
+    '--ftmodel', default=None, type=str,
+    help="finetune model"
+)
 args = parser.parse_args()
 print(args)
 
@@ -128,6 +132,10 @@ def avg_both(mrrs: Dict[str, float], mrs: Dict[str, float], hits: Dict[str, torc
 
 cur_loss = 0
 curve = {'train': [], 'valid': [], 'test': []}
+if args.ftmodel is not None:
+    model.load_state_dict(torch.load(args.ftmodel))
+    model.eval()
+    dataset.predict(model, 'test', -1)
 for e in range(args.max_epochs):
     cur_loss = optimizer.epoch(examples)
 
@@ -151,5 +159,4 @@ for e in range(args.max_epochs):
 
 model.load_state_dict(torch.load(PATH))
 model.eval()
-
 dataset.predict(model, 'test', -1)
