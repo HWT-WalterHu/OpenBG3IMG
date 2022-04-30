@@ -157,6 +157,6 @@ for e in range(args.max_epochs):
         PATH = f'./checkpoints/OpenBG-IMG_{args.name}_{e}.ckpt'
         torch.save(model.state_dict(), PATH)
 
-model.load_state_dict(torch.load(PATH))
-model.eval()
-dataset.predict(model, 'test', -1)
+        model.load_state_dict(torch.load(PATH))
+        model.eval()
+        dataset.predict(model, 'test', -1)
