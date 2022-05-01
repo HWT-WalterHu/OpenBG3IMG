@@ -91,8 +91,9 @@ with open("./data/OpenBG-IMG/entity2id.txt", "r") as enidf:
     
     if len(all_input_img) > 0:
         lengths = [len(item) for item in all_input_img]
-        vgg_input = torch.cat(all_input_img, dim=0) 
-        result = vgg16(vgg_input)
+        vgg_input = torch.cat(all_input_img, dim=0)
+        with torch.no_grad():
+            result = vgg16(vgg_input)
         results_split = torch.split(result, lengths)
         for index, item in enumerate(results_split):
             embed = item.mean(0)
