@@ -8,12 +8,13 @@ import pickle
 from tqdm import tqdm
 import os
 
+device = torch.device('cuda:0')
 
 if not os.path.exists('./data/OpenBG-IMG/img_em'):
     os.mkdir('./data/OpenBG-IMG/img_em/')
 
 
-vgg16 = models.vgg16(pretrained=True)
+vgg16 = models.vgg16(pretrained=True).to(device)
 
 
 vgg16.features = torch.nn.Sequential(collections.OrderedDict(zip(['conv1_1', 'relu1_1', 'conv1_2', 'relu1_2', 'pool1', 'conv2_1', 'relu2_1', 'conv2_2', 'relu2_2', 'pool2', 'conv3_1', 'relu3_1', 'conv3_2', 'relu3_2', 'conv3_3', 'relu3_3', 'pool3', 'conv4_1', 'relu4_1', 'conv4_2', 'relu4_2', 'conv4_3', 'relu4_3', 'pool4', 'conv5_1', 'relu5_1', 'conv5_2', 'relu5_2', 'conv5_3', 'relu5_3', 'pool5'], vgg16.features)))
@@ -23,7 +24,7 @@ vgg16.features = torch.nn.Sequential(collections.OrderedDict(zip(['conv1_1', 're
 # new_classifier = torch.nn.Sequential(*list(vgg16.classifier.children())[:-3])
 vgg16.classifier = torch.nn.Sequential(collections.OrderedDict(zip(['fc6', 'relu6', 'drop6', 'fc7'], vgg16.classifier)))
 
-print(vgg16)
+# print(vgg16)
 
 # All pre-trained models expect input images normalized in the same way, i.e. mini-batches of 3-channel RGB images of shape (3 x H x W), where H and W are expected to be at least 224. The images have to be loaded in to a range of [0, 1] and then normalized using mean = [0.485, 0.456, 0.406] and std = [0.229, 0.224, 0.225]. You can use the following transform to normalize:
 
@@ -66,8 +67,9 @@ with open("./data/OpenBG-IMG/entity2id.txt", "r") as enidf:
             entity_ids.append(entity)
         elif len(input_img) > 0 and batch_size + len(input_img) > batch_dim:
             lengths = [len(item) for item in all_input_img]
-            vgg_input = torch.cat(all_input_img, dim=0) 
-            result = vgg16(vgg_input)
+            vgg_input = torch.cat(all_input_img, dim=0).to(device)
+            with torch.no_grad():
+                result = vgg16(vgg_input).cpu()
             results_split = torch.split(result, lengths)
             for index, item in enumerate(results_split):
                 embed = item.mean(0)
@@ -91,9 +93,9 @@ with open("./data/OpenBG-IMG/entity2id.txt", "r") as enidf:
     
     if len(all_input_img) > 0:
         lengths = [len(item) for item in all_input_img]
-        vgg_input = torch.cat(all_input_img, dim=0)
+        vgg_input = torch.cat(all_input_img, dim=0).to(device)
         with torch.no_grad():
-            result = vgg16(vgg_input)
+            result = vgg16(vgg_input).cpu()
         results_split = torch.split(result, lengths)
         for index, item in enumerate(results_split):
             embed = item.mean(0)
