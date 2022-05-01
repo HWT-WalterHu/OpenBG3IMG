@@ -664,7 +664,8 @@ if not os.path.exists('./checkpoints'):
     os.mkdir('./checkpoints/')
 
 # train the model
-trainer = Trainer(model = model, data_loader = train_dataloader, train_times = 1000, alpha = 1.0, use_gpu = True)
+trainer = Trainer(model = model, data_loader = train_dataloader, train_times = 1000,
+                  alpha = 1.0, use_gpu = True, save_steps=10, checkpoint_dir='./checkpoints/OpenBG-IMG')
 trainer.run()
 transe.save_checkpoint('./checkpoints/OpenBG-IMG.ckpt')
 
